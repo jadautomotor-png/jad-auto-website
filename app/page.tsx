@@ -261,18 +261,37 @@ export default function InventoryPage() {
             ))}
           </div>
 
-          <section style={{ marginBottom: '40px', backgroundColor: '#f9f9f9', padding: '25px', borderRadius: '20px' }}>
+         <section style={{ marginBottom: '40px', backgroundColor: '#f9f9f9', padding: '25px', borderRadius: '20px' }}>
             <h3 style={{ fontSize: '22px', borderBottom: '3px solid #e31e24', paddingBottom: '10px', marginBottom: '25px' }}>{t.specsTitle}</h3>
-            <div className="specs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '25px' }}>
-              <div><span style={{ color: '#888', fontSize: '12px', display: 'block' }}>{t.km}</span><span style={{ fontWeight: 'bold' }}>{selectedCar.km} km</span></div>
-              <div><span style={{ color: '#888', fontSize: '12px', display: 'block' }}>NIV / VIN</span><span style={{ fontWeight: 'bold', fontSize: '14px' }}>{selectedCar.vin}</span></div>
-              <div><span style={{ color: '#888', fontSize: '12px', display: 'block' }}>{t.engine}</span><span style={{ fontWeight: 'bold' }}>{selectedCar.engine || '---'}</span></div>
-              <div><span style={{ color: '#888', fontSize: '12px', display: 'block' }}>{t.traction}</span><span style={{ fontWeight: 'bold' }}>{selectedCar.drivetrain || '---'}</span></div>
-              <div><span style={{ color: '#888', fontSize: '12px', display: 'block' }}>{t.color}</span><span style={{ fontWeight: 'bold' }}>{selectedCar.colour || '---'}</span></div>
-              <div><span style={{ color: '#888', fontSize: '12px', display: 'block' }}>{t.fuel}</span><span style={{ fontWeight: 'bold' }}>{selectedCar['fuel type'] || '---'}</span></div>
-              <div><span style={{ color: '#888', fontSize: '12px', display: 'block' }}>{t.doors}</span><span style={{ fontWeight: 'bold' }}>{selectedCar.doors || '---'}</span></div>
-              <div><span style={{ color: '#888', fontSize: '12px', display: 'block' }}>{t.seats}</span><span style={{ fontWeight: 'bold' }}>{selectedCar.seats || '---'}</span></div>
-              <div><span style={{ color: '#888', fontSize: '12px', display: 'block' }}>{t.features}</span><span style={{ fontWeight: 'bold' }}>{selectedCar.features || '---'}</span></div>
+            <div className="specs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '25px' }}>
+              {Object.keys(selectedCar)
+                .filter(key => !['id', 'created_at', 'folder', 'price', 'year', 'model', 'status', 'carfax_url', 'vin', 'features'].includes(key))
+                .map((key) => {
+                  // نظام اختيار الأيقونة تلقائياً بناءً على اسم العمود
+                  let icon = '🔹'; 
+                  if (key.toLowerCase().includes('engine')) icon = '⚙️';
+                  if (key.toLowerCase().includes('km') || key.toLowerCase().includes('mileage')) icon = '📍';
+                  if (key.toLowerCase().includes('fuel')) icon = '⛽';
+                  if (key.toLowerCase().includes('transmission')) icon = '🕹️';
+                  if (key.toLowerCase().includes('color') || key.toLowerCase().includes('colour')) icon = '🎨';
+                  if (key.toLowerCase().includes('drive')) icon = '🛣️';
+                  if (key.toLowerCase().includes('door')) icon = '🚪';
+                  if (key.toLowerCase().includes('seat')) icon = '💺';
+
+                  return (
+                    <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '24px' }}>{icon}</span>
+                      <div>
+                        <span style={{ color: '#888', fontSize: '11px', display: 'block', textTransform: 'uppercase' }}>
+                          {key.replace('_', ' ')}
+                        </span>
+                        <span style={{ fontWeight: 'bold', fontSize: '15px' }}>
+                          {selectedCar[key] || '---'}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           </section>
 
