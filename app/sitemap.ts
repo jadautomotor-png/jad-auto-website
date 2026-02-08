@@ -5,7 +5,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: 'https://jadauto.ca',
       lastModified: new Date(),
-      changeFrequency: 'daily', // نخبر جوجل أننا نحدث السيارات يومياً
+      changeFrequency: 'daily',
       priority: 1,
     },
     {
@@ -13,12 +13,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
-    },
-    {
-      url: 'https://jadauto.ca/financing',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
     },
   ]
 }
