@@ -1,5 +1,8 @@
 import { MetadataRoute } from 'next'
 
+// أضفنا هذا السطر لحل مشكلة Vercel
+export const dynamic = 'force-dynamic'
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
