@@ -148,8 +148,8 @@ export default function InventoryPage() {
             <span style={{ fontSize: '36px', fontWeight: 'bold', color: '#e31e24' }}>${Number(selectedCar.price).toLocaleString()}</span>
             <span style={{ fontSize: '16px', color: '#888', marginLeft: '10px' }}>{t.tax}</span>
           </p>
-          {/* WhatsApp Button - Jad Auto */}
-<a  href={`https://wa.me/15149788910?text=${encodeURIComponent(`Hello Jad Auto, I am interested in the ${selectedCar.name}`)}`} 
+         {/* WhatsApp Button - Jad Auto */}
+<a href={`https://wa.me/15149788910?text=${encodeURIComponent(`Hello Jad Auto, I am interested in the ${selectedCar.year} ${selectedCar.model}`)}`}
   rel="noopener noreferrer"
   style={{
     display: 'flex',
@@ -173,15 +173,16 @@ export default function InventoryPage() {
   </svg>
   Contact on WhatsApp
 </a>
+
 {/* Email Button - Jad Auto */}
 <a 
-  href={`mailto:Jadauto.motor@gmail.com?subject=${encodeURIComponent(`Inquiry about ${selectedCar.name}`)}&body=${encodeURIComponent(`Hello Jad Auto,\n\nI saw the ${selectedCar.name} on your website and I would like to get more information about it.\n\nThank you.`)}`}
+  href={`mailto:Jadauto.motor@gmail.com?subject=${encodeURIComponent(`Inquiry about ${selectedCar.year} ${selectedCar.model}`)}&body=${encodeURIComponent(`Hello Jad Auto,\n\nI saw the ${selectedCar.year} ${selectedCar.model} on your website and I would like to get more information about it.\n\nThank you.`)}`}
   style={{
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    backgroundColor: '#333', // لون رمادي غامق احترافي
+    backgroundColor: '#333',
     color: '#fff',
     padding: '12px',
     borderRadius: '12px',
@@ -198,9 +199,10 @@ export default function InventoryPage() {
   </svg>
   Send Email
 </a>
+
 {/* Test Drive Button - Jad Auto */}
 <a 
-  href={`https://wa.me/15149788910?text=${encodeURIComponent(`Hello Jad Auto, I would like to book a Test Drive for: ${selectedCar.name}.\n\nMy Name: \nMy Phone: \nPreferred Date: `)}`} 
+  href={`https://wa.me/15149788910?text=${encodeURIComponent(`Hello Jad Auto, I would like to book a Test Drive for: ${selectedCar.year} ${selectedCar.model}.\n\nMy Name: \nMy Phone: \nPreferred Date: `)}`} 
   target="_blank" 
   rel="noopener noreferrer"
   style={{
