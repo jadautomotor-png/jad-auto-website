@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "JAD AUTO | Premium Car Trading",
-  description: "Your trusted platform for luxury and certified pre-owned vehicles.",
-  icons: {
-    icon: "/logo.jpg",
-  },
+export const metadata = {
+  title: 'Jad Auto Selection | Used Cars Montreal & Laval | Voitures d\'occasion',
+  description: 'Best used cars in Montreal and Laval. Financing available. | Les meilleures voitures d\'occasion à Montréal et Laval. Financement disponible.',
+  keywords: 'Used cars Montreal, Voitures d\'occasion Montréal, Jad Auto, Car dealer Laval, Ram 1500 Quebec',
 };
 
 export default function RootLayout({
