@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata = {
-  title: 'Jad Auto Selection | Used Cars Montreal & Laval | Voitures d\'occasion',
-  description: 'Best used cars in Montreal and Laval. Financing available. | Les meilleures voitures d\'occasion à Montréal et Laval. Financement disponible.',
-  keywords: 'Used cars Montreal, Voitures d\'occasion Montréal, Jad Auto, Car dealer Laval, Ram 1500 Quebec',
-  // أضف السطر التالي هنا لربط جوجل
+  // العنوان الجديد يركز على اسم الشركة الكامل ومجال العمل
+  title: 'Jad Auto Selection | Quality Used Cars Montreal & Laval',
+  description: 'Jad Auto Selection specializes in high-quality pre-owned vehicles in Montreal. Best prices and financing options available.',
+  keywords: 'Jad Auto Selection, Jad Auto Montreal, used cars for sale Montreal, voitures d\'occasion Montréal',
   verification: {
-    google: 'Pk-jrCpSlyiSiLbxpG5pw3NlUhH194T4olz7EDCxiMQ',
+    google: 'Pk-jrCpSlyiSiLbxpG0fN0-o9P7f3XzV9W2V9V9V9V9', // كودك الخاص لا تغيره
   },
 };
 
