@@ -1,6 +1,5 @@
-
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -8,10 +7,17 @@ const supabase = createClient(
   'sb_publishable_fPVGiki2mMqSDaFiHPdpyA_GLyLeqcF'
 );
 
+// ---- Photo gallery settings (Jad Auto) ----
+const TOTAL_PHOTOS = 23;
+const PHOTO_BASE = 'https://aqxcwfvqpljqpfwlkcce.supabase.co/storage/v1/object/public/car-photos';
+const photoUrl = (folder: string, n: number) =>
+  `${PHOTO_BASE}/${folder}/${n === 23 ? '23.webp' : n + '.jpg'}`;
+
 export default function InventoryPage() {
   const [cars, setCars] = useState<any[]>([]);
   const [selectedCar, setSelectedCar] = useState<any>(null);
   const [activeImg, setActiveImg] = useState(1);
+  const [failedPhotos, setFailedPhotos] = useState<number[]>([]);
   const [lang, setLang] = useState<'EN' | 'FR'>('EN'); 
   
   const [downPayment, setDownPayment] = useState(5000);
@@ -45,10 +51,82 @@ export default function InventoryPage() {
   useEffect(() => {
     async function getInventory() {
       const { data } = await supabase.from('cars').select('*');
-      if (data) setCars(data);
+      if (data) {
+        // Jad Auto: available cars first, SOLD cars at the end
+        const sorted = [...data].sort((a: any, b: any) => {
+          const aSold = String(a.status || '').toLowerCase() === 'sold' ? 1 : 0;
+          const bSold = String(b.status || '').toLowerCase() === 'sold' ? 1 : 0;
+          if (aSold !== bSold) return aSold - bSold;
+          return (a.display_order ?? 999999) - (b.display_order ?? 999999);
+        });
+        setCars(sorted);
+      }
     }
     getInventory();
   }, []);
+
+  // ---- Gallery helpers (Jad Auto) ----
+  const openCar = (car: any) => {
+    setSelectedCar(car);
+    setActiveImg(1);
+    setFailedPhotos([]);
+    window.scrollTo(0, 0);
+  };
+
+  const closeCar = () => {
+    setSelectedCar(null);
+    setActiveImg(1);
+    setFailedPhotos([]);
+  };
+
+  const markPhotoFailed = (n: number) => {
+    setFailedPhotos((prev) => (prev.includes(n) ? prev : [...prev, n]));
+  };
+
+  const goPhoto = (dir: 1 | -1) => {
+    if (!selectedCar) return;
+    let n = activeImg;
+    for (let i = 0; i < TOTAL_PHOTOS; i++) {
+      n = dir === 1 ? (n % TOTAL_PHOTOS) + 1 : ((n - 2 + TOTAL_PHOTOS) % TOTAL_PHOTOS) + 1;
+      if (!failedPhotos.includes(n)) break;
+    }
+    setActiveImg(n);
+  };
+
+  const onMainPhotoError = () => {
+    const updated = failedPhotos.includes(activeImg) ? failedPhotos : [...failedPhotos, activeImg];
+    setFailedPhotos(updated);
+    let n = activeImg;
+    for (let i = 0; i < TOTAL_PHOTOS; i++) {
+      n = (n % TOTAL_PHOTOS) + 1;
+      if (!updated.includes(n)) {
+        setActiveImg(n);
+        return;
+      }
+    }
+  };
+
+  const arrowStyle = (side: 'left' | 'right'): CSSProperties => ({
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    left: side === 'left' ? '12px' : undefined,
+    right: side === 'right' ? '12px' : undefined,
+    width: '46px',
+    height: '46px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    color: '#fff',
+    border: '2px solid rgba(255,255,255,0.7)',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    lineHeight: 1,
+    zIndex: 2,
+  });
 
   const calculateMonthly = (price: number) => {
     const loanAmount = price - downPayment;
@@ -128,21 +206,21 @@ export default function InventoryPage() {
       </span>
     )}
   </div>
-)}              <img src={`https://aqxcwfvqpljqpfwlkcce.supabase.co/storage/v1/object/public/car-photos/${car.folder}/1.jpg`} style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
+)}              <img src={`${PHOTO_BASE}/${car.folder}/1.jpg`} style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
               <div style={{ padding: '20px', textAlign: 'center' }}>
                 <h2 style={{ fontSize: '20px', fontWeight: '800' }}>{car.year} {car.model}</h2>
                 <div style={{ marginBottom: '15px' }}>
                   <span style={{ fontSize: '26px', fontWeight: 'bold', color: '#e31e24' }}>${Number(car.price).toLocaleString()}</span>
                   <span style={{ fontSize: '12px', color: '#888', marginLeft: '5px' }}>{t.tax}</span>
                 </div>
-                <button onClick={() => { setSelectedCar(car); window.scrollTo(0,0); }} style={{ width: '100%', padding: '12px', backgroundColor: '#000', color: '#fff', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', border: 'none' }}>{t.viewDetails}</button>
+                <button onClick={() => openCar(car)} style={{ width: '100%', padding: '12px', backgroundColor: '#000', color: '#fff', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', border: 'none' }}>{t.viewDetails}</button>
               </div>
             </div>
           ))}
         </div>
       ) : (
         <div style={{ maxWidth: '1050px', margin: '0 auto', padding: '20px' }}>
-          <button onClick={() => setSelectedCar(null)} style={{ marginBottom: '20px', cursor: 'pointer', background: '#000', color: '#fff', padding: '10px 20px', borderRadius: '8px', border: 'none' }}>{t.back}</button>
+          <button onClick={closeCar} style={{ marginBottom: '20px', cursor: 'pointer', background: '#000', color: '#fff', padding: '10px 20px', borderRadius: '8px', border: 'none' }}>{t.back}</button>
           
           <h1 style={{ fontSize: '32px', fontWeight: '900', marginBottom: '10px' }}>{selectedCar.year} {selectedCar.model}</h1>
           <p style={{ marginBottom: '20px' }}>
@@ -254,12 +332,35 @@ export default function InventoryPage() {
   </a>
 )}
 
-          <img src={`https://aqxcwfvqpljqpfwlkcce.supabase.co/storage/v1/object/public/car-photos/${selectedCar.folder}/${activeImg === 23 ? '23.webp' : activeImg + '.jpg'}`} style={{ width: '100%', borderRadius: '20px', marginBottom: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+          {/* Photo Gallery - Jad Auto: centered frame, arrows, counter */}
+          <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 10', borderRadius: '20px', overflow: 'hidden', marginBottom: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', backgroundColor: '#111' }}>
+            <img
+              key={`${selectedCar.folder}-${activeImg}`}
+              src={photoUrl(selectedCar.folder, activeImg)}
+              onError={onMainPhotoError}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              alt={`${selectedCar.year} ${selectedCar.model} - photo ${activeImg}`}
+            />
+            <button onClick={() => goPhoto(-1)} style={arrowStyle('left')} aria-label="Previous photo">‹</button>
+            <button onClick={() => goPhoto(1)} style={arrowStyle('right')} aria-label="Next photo">›</button>
+            <div style={{ position: 'absolute', bottom: '12px', right: '12px', backgroundColor: 'rgba(0,0,0,0.65)', color: '#fff', padding: '5px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', zIndex: 2 }}>
+              {activeImg} / {TOTAL_PHOTOS}
+            </div>
+          </div>
 
           <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '30px' }}>
-            {Array.from({ length: 23 }, (_, i) => i + 1).map(n => (
-              <img key={n} src={`https://aqxcwfvqpljqpfwlkcce.supabase.co/storage/v1/object/public/car-photos/${selectedCar.folder}/${n === 23 ? '23.webp' : n + '.jpg'}`} onClick={() => setActiveImg(n)} style={{ width: '100px', height: '70px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: activeImg === n ? '3px solid #e31e24' : '1px solid #eee', flexShrink: 0 }} />
-            ))}
+            {Array.from({ length: TOTAL_PHOTOS }, (_, i) => i + 1)
+              .filter((n) => !failedPhotos.includes(n))
+              .map((n) => (
+                <img
+                  key={n}
+                  src={photoUrl(selectedCar.folder, n)}
+                  onClick={() => setActiveImg(n)}
+                  onError={() => markPhotoFailed(n)}
+                  style={{ width: '100px', height: '70px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer', border: activeImg === n ? '3px solid #e31e24' : '1px solid #eee', flexShrink: 0 }}
+                  alt={`Thumbnail ${n}`}
+                />
+              ))}
           </div>
 
          <section style={{ marginBottom: '40px', backgroundColor: '#f9f9f9', padding: '25px', borderRadius: '20px' }}>
