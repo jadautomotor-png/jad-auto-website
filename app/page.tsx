@@ -367,10 +367,10 @@ export default function InventoryPage() {
             <h3 style={{ fontSize: '22px', borderBottom: '3px solid #e31e24', paddingBottom: '10px', marginBottom: '25px' }}>{t.specsTitle}</h3>
             <div className="specs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '25px' }}>
               {(() => {
-                const HIDDEN = ['id', 'created_at', 'folder', 'price', 'year', 'model', 'status', 'carfax_url', 'vin', 'features', 'interior_features', 'display_order'];
+                const HIDDEN = ['id', 'created_at', 'folder', 'price', 'year', 'model', 'status', 'carfax_url', 'vin', 'display_order'];
                 const ORDER = ['km', 'mileage', 'engine', 'drivetrain', 'transmission', 'fuel_type', 'colour', 'color', 'doors', 'seats', 'body_type', 'safety'];
                 const keys = Object.keys(selectedCar)
-                  .filter((k) => !HIDDEN.includes(k))
+                  .filter((k) => !HIDDEN.includes(k) && !/feature/i.test(k))
                   .filter((k) => { const v = (selectedCar as any)[k]; return v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '---'; })
                   .sort((a, b) => { const ia = ORDER.indexOf(a); const ib = ORDER.indexOf(b); return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib); });
                 return keys.map((key) => {
@@ -404,9 +404,10 @@ export default function InventoryPage() {
               })()}
             </div>
             {(() => {
-              const raw = (selectedCar as any).interior_features || (selectedCar as any).features;
+              const featKey = Object.keys(selectedCar).find((k) => /feature/i.test(k) && (selectedCar as any)[k]);
+              const raw = featKey ? (selectedCar as any)[featKey] : null;
               if (!raw) return null;
-              const items = String(raw).split(/\u2713|\u2022|,/).map((s) => s.trim()).filter(Boolean);
+              const items = String(raw).replace(/^[^:\n]*features?[^:\n]*:/i, '').split(/\u2705|\u2713|\u2714|\u2022|,|\n/).map((s) => s.trim()).filter(Boolean);
               if (!items.length) return null;
               return (
                 <div style={{ marginTop: '30px', borderTop: '1px solid #e5e5e5', paddingTop: '20px' }}>
