@@ -22,7 +22,7 @@ export default function InventoryPage() {
   
   const [downPayment, setDownPayment] = useState(5000);
   const [loanTerm, setLoanTerm] = useState(24); 
-  const [interestRate, setInterestRate] = useState(6.99);
+  const [interestRate, setInterestRate] = useState(8.99);
 
   const t = {
     heroSub: lang === 'EN' ? 'Excellence in motion' : 'Excellence en mouvement',
@@ -366,35 +366,61 @@ export default function InventoryPage() {
          <section style={{ marginBottom: '40px', backgroundColor: '#f9f9f9', padding: '25px', borderRadius: '20px' }}>
             <h3 style={{ fontSize: '22px', borderBottom: '3px solid #e31e24', paddingBottom: '10px', marginBottom: '25px' }}>{t.specsTitle}</h3>
             <div className="specs-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '25px' }}>
-              {Object.keys(selectedCar)
-                .filter(key => !['id', 'created_at', 'folder', 'price', 'year', 'model', 'status', 'carfax_url', 'vin', 'features'].includes(key))
-                .map((key) => {
-                  // نظام اختيار الأيقونة تلقائياً بناءً على اسم العمود
-                  let icon = '🔹'; 
-                  if (key.toLowerCase().includes('engine')) icon = '⚙️';
-                  if (key.toLowerCase().includes('km') || key.toLowerCase().includes('mileage')) icon = '📍';
-                  if (key.toLowerCase().includes('fuel')) icon = '⛽';
-                  if (key.toLowerCase().includes('transmission')) icon = '🕹️';
-                  if (key.toLowerCase().includes('color') || key.toLowerCase().includes('colour')) icon = '🎨';
-                  if (key.toLowerCase().includes('drive')) icon = '🛣️';
-                  if (key.toLowerCase().includes('door')) icon = '🚪';
-                  if (key.toLowerCase().includes('seat')) icon = '💺';
-
+              {(() => {
+                const HIDDEN = ['id', 'created_at', 'folder', 'price', 'year', 'model', 'status', 'carfax_url', 'vin', 'features', 'interior_features', 'display_order'];
+                const ORDER = ['km', 'mileage', 'engine', 'drivetrain', 'transmission', 'fuel_type', 'colour', 'color', 'doors', 'seats', 'body_type', 'safety'];
+                const keys = Object.keys(selectedCar)
+                  .filter((k) => !HIDDEN.includes(k))
+                  .filter((k) => { const v = (selectedCar as any)[k]; return v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '---'; })
+                  .sort((a, b) => { const ia = ORDER.indexOf(a); const ib = ORDER.indexOf(b); return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib); });
+                return keys.map((key) => {
+                  let icon = '\u{1F539}';
+                  if (key.toLowerCase().includes('engine')) icon = '\u2699\uFE0F';
+                  if (key.toLowerCase().includes('km') || key.toLowerCase().includes('mileage')) icon = '\u{1F4CD}';
+                  if (key.toLowerCase().includes('fuel')) icon = '\u26FD';
+                  if (key.toLowerCase().includes('transmission')) icon = '\u{1F579}\uFE0F';
+                  if (key.toLowerCase().includes('color') || key.toLowerCase().includes('colour')) icon = '\u{1F3A8}';
+                  if (key.toLowerCase().includes('drive')) icon = '\u{1F6E3}\uFE0F';
+                  if (key.toLowerCase().includes('door')) icon = '\u{1F6AA}';
+                  if (key.toLowerCase().includes('seat')) icon = '\u{1F4BA}';
+                  if (key.toLowerCase().includes('body')) icon = '\u{1F697}';
+                  if (key.toLowerCase().includes('safety')) icon = '\u{1F6E1}\uFE0F';
+                  let value = String((selectedCar as any)[key]);
+                  if ((key === 'km' || key === 'mileage') && !isNaN(Number(value))) value = Number(value).toLocaleString('en-CA') + ' km';
                   return (
                     <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <span style={{ fontSize: '24px' }}>{icon}</span>
                       <div>
                         <span style={{ color: '#888', fontSize: '11px', display: 'block', textTransform: 'uppercase' }}>
-                          {key.replace('_', ' ')}
+                          {key.replace(/_/g, ' ')}
                         </span>
                         <span style={{ fontWeight: 'bold', fontSize: '15px' }}>
-                          {selectedCar[key] || '---'}
+                          {value}
                         </span>
                       </div>
                     </div>
                   );
-                })}
+                });
+              })()}
             </div>
+            {(() => {
+              const raw = (selectedCar as any).interior_features || (selectedCar as any).features;
+              if (!raw) return null;
+              const items = String(raw).split(/\u2713|\u2022|,/).map((s) => s.trim()).filter(Boolean);
+              if (!items.length) return null;
+              return (
+                <div style={{ marginTop: '30px', borderTop: '1px solid #e5e5e5', paddingTop: '20px' }}>
+                  <h4 style={{ fontSize: '16px', marginBottom: '15px', color: '#333' }}>{t.features}</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                    {items.map((f, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+                        <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>{'\u2713'}</span> {f}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </section>
 
           <section style={{ marginBottom: '40px', textAlign: 'center', padding: '30px', backgroundColor: '#000', color: '#fff', borderRadius: '20px' }}>
@@ -422,7 +448,18 @@ export default function InventoryPage() {
               <div style={{ textAlign: 'center', backgroundColor: '#f9f9f9', padding: '30px', borderRadius: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <p style={{ fontSize: '14px', fontWeight: 'bold' }}>{t.monthly}</p>
                 <h2 style={{ fontSize: '50px', color: '#2ecc71', fontWeight: '900', margin: '10px 0' }}>${calculateMonthly(selectedCar.price)}</h2>
-                <button style={{ backgroundColor: '#2ecc71', color: '#fff', padding: '15px', borderRadius: '12px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>{t.getApproved}</button>
+                <button
+                onClick={() => {
+                  const rawKm = (selectedCar as any).km ?? (selectedCar as any).mileage;
+                  const kmNum = rawKm != null && rawKm !== '' ? Number(String(rawKm).replace(/[^0-9]/g, '')) : NaN;
+                  const kmText = !isNaN(kmNum) && kmNum > 0 ? kmNum.toLocaleString('en-CA') + ' km' : '';
+                  const priceText = '$' + Number(selectedCar.price || 0).toLocaleString('en-CA');
+                  const msg = lang === 'EN'
+                    ? `Hello Jad Auto, I'm interested in your ${selectedCar.year} ${selectedCar.model}${kmText ? ' - ' + kmText : ''}, priced at ${priceText}. I'd like to get approved for financing, please.`
+                    : `Bonjour Jad Auto, je suis interesse par votre ${selectedCar.year} ${selectedCar.model}${kmText ? ' - ' + kmText : ''}, affiche a ${priceText}. J'aimerais faire une demande de financement, s'il vous plait.`;
+                  window.open('https://wa.me/15149788910?text=' + encodeURIComponent(msg), '_blank');
+                }}
+                style={{ backgroundColor: '#2ecc71', color: '#fff', padding: '15px', borderRadius: '12px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}>{t.getApproved}</button>
               </div>
             </div>
           </section>
